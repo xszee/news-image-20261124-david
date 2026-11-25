@@ -1,8 +1,8 @@
 # THE MORNING GLOBE
 
-![bounty](https://make.fun/badge/news-image-20261124.svg)
-![rank](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/rank.svg)
-![reward](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/reward.svg)
+[![make.fun · news-image-20261124](https://make.fun/badge/news-image-20261124.svg)](https://make.fun/bounty/news-image-20261124?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261124)
+[![rank](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/rank.svg)](https://make.fun/bounty/news-image-20261124/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261124)
+[![reward](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/reward.svg)](https://make.fun/bounty/news-image-20261124?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261124)
 
 A single-page morning paper covering Tuesday, 24 November 2026 — every
 story on the page was first reported that day. The front page leads with
