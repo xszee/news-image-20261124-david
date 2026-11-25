@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
-"""Draw a one-page newspaper front page for Tuesday 24 November 2026.
-Fresh drawing for the david account entry, news-image-20261124.
-Lead: Nvidia brings back Jensen Huang. Only verified facts from the
-task brief are used. PIL only. Writes art.png (1024x1024)."""
+"""Draw THE MORNING GLOBE front page for Tuesday, 24 November 2026.
+
+Fresh artwork for the make.fun news-image-20261124 bounty (david account).
+All stories are the verified events of 24 Nov 2026 listed in the brief.
+1024x1024, black ink on cream paper, DejaVu / Liberation Serif fonts.
+"""
+import textwrap
 from PIL import Image, ImageDraw, ImageFont
 
-W = H = 1024
-M = 36
-RED = (178, 24, 24)
-INK = (18, 18, 18)
+W, H = 1024, 1024
+PAPER = (251, 250, 245)
+INK = (17, 17, 17)
 GREY = (90, 90, 90)
 
-SERIF = "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"
-SERIF_R = "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"
+SERIF = "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"
+SERIF_B = "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"
 SERIF_I = "/usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf"
-SANS = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
-SANS_B = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+
 
 def font(path, size):
     return ImageFont.truetype(path, size)
 
+
 def wrap(draw, text, fnt, width):
+    """Greedy word wrap measured with the real font."""
     lines, cur = [], ""
     for word in text.split():
         trial = (cur + " " + word).strip()
@@ -34,156 +37,187 @@ def wrap(draw, text, fnt, width):
         lines.append(cur)
     return lines
 
-def para(draw, x, y, width, text, fnt, fill=INK, leading=None):
-    lh = leading or int(fnt.size * 1.28)
-    for ln in wrap(draw, text, fnt, width):
+
+def para(draw, x, y, text, fnt, width, leading, fill=INK):
+    lines = wrap(draw, text, fnt, width)
+    for ln in lines:
         draw.text((x, y), ln, font=fnt, fill=fill)
-        y += lh
+        y += leading
     return y
 
-def rule(draw, x0, x1, y, w=2, fill=INK):
-    draw.line([(x0, y), (x1, y)], fill=fill, width=w)
 
-img = Image.new("RGB", (W, H), "white")
-d = ImageDraw.Draw(img)
+def centre(draw, y, text, fnt, fill=INK):
+    w = draw.textlength(text, font=fnt)
+    draw.text(((W - w) / 2, y), text, font=fnt, fill=fill)
+    return y + fnt.size
 
-# ---- masthead ----
-rule(d, M, W - M, 22, 3)
-d.text((W // 2, 30), "THE WORLD IN ONE DAY", font=font(SERIF, 58),
-       fill=INK, anchor="ma")
-rule(d, M, W - M, 98, 2)
-d.text((W // 2, 106), "TUESDAY, 24 NOVEMBER 2026", font=font(SANS_B, 21),
-       fill=RED, anchor="ma")
-d.text((M, 108), "No. 329", font=font(SANS, 13), fill=GREY)
-d.text((W - M, 108), "ONE DAY  •  ONE PAGE", font=font(SANS, 13),
-       fill=GREY, anchor="ra")
-rule(d, M, W - M, 136, 1, fill=GREY)
 
-# ---- standfirst ----
-sf = "Nvidia brings back Jensen Huang, Huawei is found guilty, and markets surge \u2014 the whole world, in a single page."
-y = para(d, M, 146, W - 2 * M, sf, font(SERIF_I, 18), fill=(50, 50, 50), leading=22)
-rule(d, M, W - M, y + 8, 1, fill=GREY)
+def rule(draw, x0, x1, y, width=1):
+    draw.line([(x0, y), (x1, y)], fill=INK, width=width)
 
-# ---- LEAD: Nvidia, full width ----
-ly = y + 18
-d.text((M, ly), "LEAD STORY  •  MARKETS", font=font(SANS_B, 13), fill=RED)
-ly += 20
-ly = para(d, M, ly, W - 2 * M,
-          "NVIDIA BRINGS BACK JENSEN HUANG",
-          font(SERIF, 38), leading=42)
-ly = para(d, M, ly + 2, W - 2 * M,
-          "Nvidia reinstated Jensen Huang as CEO on Monday; President Trump said he personally persuaded the board. Markets surged \u2014 Seoul stocks +6%, the Nikkei +3.91%.",
-          font(SERIF_R, 17), leading=22)
-rule(d, M, W - M, ly + 10, 2)
 
-# ---- Row 1: two columns ----
-r1 = ly + 22
-col_w = (W - 2 * M - 24) // 2
-stories2 = [
-    ("UNITED STATES  •  COURT", "Huawei guilty of trade-secret theft",
-     "A US jury convicts Huawei of conspiracy to steal trade secrets and bank fraud, and acquits it of racketeering."),
-    ("STRAIT OF HORMUZ", "IRGC says it attacked a container ship",
-     "Iran's Revolutionary Guard said its navy attacked a container ship in the Strait of Hormuz, and Iran reported tankers hit mines there."),
-]
-max_y = r1
-for i, (kick, head, body) in enumerate(stories2):
-    x = M + i * (col_w + 24)
-    yy = r1
-    d.text((x, yy), kick, font=font(SANS_B, 12), fill=RED)
-    yy += 18
-    yy = para(d, x, yy, col_w, head, font(SERIF, 24), leading=27)
-    yy = para(d, x, yy + 3, col_w, body, font(SERIF_R, 14.5), leading=19)
-    max_y = max(max_y, yy)
-    if i == 0:
-        d.line([(x + col_w + 12, r1), (x + col_w + 12, max_y)], fill=(200, 200, 200), width=1)
-rule(d, M, W - M, max_y + 10, 1, fill=GREY)
+def draw_scales(draw, cx, top, bottom):
+    """Simple scales of justice: post, beam, two hanging pans, base."""
+    beam_y = top + 18
+    pan_y = top + 88
+    # finial + post
+    draw.ellipse([cx - 6, top - 6, cx + 6, top + 6], outline=INK, width=3)
+    draw.line([(cx, top + 6), (cx, bottom - 22)], fill=INK, width=4)
+    # beam
+    draw.line([(cx - 108, beam_y), (cx + 108, beam_y)], fill=INK, width=4)
+    draw.ellipse([cx - 4, beam_y - 4, cx + 4, beam_y + 4], outline=INK, width=3)
+    # base
+    draw.line([(cx - 52, bottom - 22), (cx + 52, bottom - 22)], fill=INK, width=4)
+    draw.line([(cx - 34, bottom - 10), (cx + 34, bottom - 10)], fill=INK, width=4)
+    for end in (-108, 108):
+        px = cx + end
+        # strings from beam end to pan rim
+        draw.line([(px, beam_y), (px - 34, pan_y)], fill=INK, width=2)
+        draw.line([(px, beam_y), (px + 34, pan_y)], fill=INK, width=2)
+        draw.line([(px, beam_y), (px, pan_y - 6)], fill=INK, width=2)
+        # pan: shallow bowl (arc + chord)
+        draw.arc([px - 34, pan_y - 26, px + 34, pan_y + 26], 0, 180, fill=INK, width=3)
+        draw.line([(px - 34, pan_y), (px + 34, pan_y)], fill=INK, width=3)
 
-# ---- Row 2: three columns ----
-r2 = max_y + 22
-col3 = (W - 2 * M - 48) // 3
-stories3 = [
-    ("THE HAGUE", "Genocide ruling backed",
-     "The UK, Spain, Canada, Australia and 10 more affirm the ICJ ruling that Myanmar committed genocide against the Rohingya."),
-    ("UKRAINE  •  AT SEA", "Drones hit Russian ships",
-     "Kyiv acknowledges drone strikes on the cargo ship Sparta II in the Gulf of Finland and a warship off Libya."),
-    ("SPACE  •  CHINA", "Shenzhou 24 lifts off",
-     "China launches Shenzhou 24 with two Chinese and one Pakistani astronaut \u2014 Zeeshan Ali, the first foreign astronaut on Tiangong."),
-]
-max_y2 = r2
-for i, (kick, head, body) in enumerate(stories3):
-    x = M + i * (col3 + 24)
-    yy = r2
-    d.text((x, yy), kick, font=font(SANS_B, 11.5), fill=RED)
-    yy += 17
-    yy = para(d, x, yy, col3, head, font(SERIF, 20), leading=23)
-    yy = para(d, x, yy + 3, col3, body, font(SERIF_R, 13.5), leading=18)
-    max_y2 = max(max_y2, yy)
-    if i < 2:
-        d.line([(x + col3 + 12, r2), (x + col3 + 12, max_y2)], fill=(200, 200, 200), width=1)
-rule(d, M, W - M, max_y2 + 10, 2)
 
-# ---- Map strip ----
-my = max_y2 + 20
-d.text((M, my), "THE DAY ON THE MAP", font=font(SANS_B, 14), fill=INK)
-d.text((W - M, my), "SIX PLACES THAT MADE THE NEWS", font=font(SANS, 11),
-       fill=GREY, anchor="ra")
-my += 22
-d.rectangle([M, my, W - M, my + 56], fill=(232, 240, 248), outline=(180, 200, 220))
-places = [
-    ("Cartagena", 0.06), ("The Hague", 0.30), ("Kyiv", 0.42),
-    ("Ankara", 0.50), ("Hormuz", 0.62), ("Beijing", 0.90),
-]
-for name, fx in places:
-    cx = M + int(fx * (W - 2 * M))
-    cy = my + 21
-    d.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=RED, outline="white", width=2)
-    d.text((cx, cy + 10), name, font=font(SANS_B, 11), fill=INK, anchor="ma")
-map_bottom = my + 56
+def main():
+    img = Image.new("RGB", (W, H), PAPER)
+    d = ImageDraw.Draw(img)
+    MX = 36                      # side margin
+    RX = W - MX                  # right edge
 
-# ---- Brief: 18 items in two columns ----
-by = map_bottom + 16
-d.text((M, by), "THE DAY IN BRIEF", font=font(SANS_B, 14), fill=INK)
-rule(d, M, W - M, by + 22, 1, fill=GREY)
-brief = [
-    "A 5.6-magnitude earthquake strikes Nepal near the Chinese border.",
-    "UN chief Guterres calls for a multilateral framework to limit AI risks within a year.",
-    "Turkish Air Force helicopter crashes after take-off from Eskisehir; 5 crew killed.",
-    "Houthi fighters about 60 km from Aden and ready to attack, Yemen's military says.",
-    "Senegal regains the Africa Cup of Nations title after a sports court appeal.",
-    "North Korea demands closure of Switzerland's new diplomatic office in Pyongyang.",
-    "Blast at a hot pot eatery in Hanoi kills 6 and injures more than a dozen.",
-    "Bangladesh's ousted leader Hasina plans to return from exile on Dec 16.",
-    "UK sanctions Yemen's Houthis and four senior officials.",
-    "Israeli air strike kills Hamas internal security chief Brig. Gen. Naeem Abu Mohammed Nahel in Gaza.",
-    "Libyan commander Khalifa Haftar visits Turkey for the first time, to meet Erdogan.",
-    "Armed men seize a Cartagena supermarket and hold 25 people hostage.",
-    "US ready to impose tariffs on China and the EU.",
-    "A quasar is found 630 million years after the Big Bang.",
-    "Pope Francis's diary is published.",
-    "Markets: S&P 500 +4.73%, Nasdaq +6.51%.",
-    "Nvidia reinstates Jensen Huang as CEO after Trump persuades the board.",
-    "Huawei acquitted of racketeering, despite guilty verdicts on trade secrets and fraud.",
-]
-bcol_w = (W - 2 * M - 24) // 2
-bf = font(SANS, 12.5)
-row_h = 34
-for idx, item in enumerate(brief):
-    col = idx // 9
-    row = idx % 9
-    x = M + col * (bcol_w + 24)
-    yy = by + 32 + row * row_h
-    d.text((x, yy), "\u2022", font=font(SANS_B, 13), fill=RED)
-    para(d, x + 14, yy, bcol_w - 14, item, bf, leading=15)
+    # ---- masthead ----
+    f_mast = font(SERIF_B, 66)
+    centre(d, 16, "THE MORNING GLOBE", f_mast)
+    rule(d, MX, RX, 100, 4)
+    rule(d, MX, RX, 107, 1)
 
-# ---- footer ----
-fy = by + 32 + 9 * row_h + 6
-rule(d, M, W - M, fy, 1, fill=GREY)
-d.text((W // 2, fy + 6),
-       "All stories were reported on Tuesday 24 November 2026.  Sources: Reuters, AP, AFP, BBC.",
-       font=font(SANS, 12), fill=GREY, anchor="ma")
-d.text((W // 2, fy + 22),
-       "THE WORLD IN ONE DAY  \u00b7  TUESDAY, 24 NOVEMBER 2026",
-       font=font(SANS_B, 11), fill=GREY, anchor="ma")
+    # ---- date line, thin rules left and right ----
+    f_date = font(SERIF_B, 20)
+    date_txt = "TUESDAY, 24 NOVEMBER 2026"
+    dw = d.textlength(date_txt, font=f_date)
+    gap = 14
+    rule(d, MX, (W - dw) / 2 - gap, 122, 1)
+    rule(d, (W + dw) / 2 + gap, RX, 122, 1)
+    d.text(((W - dw) / 2, 110), date_txt, font=f_date, fill=INK)
 
-img.save("art.png", optimize=True)
-print("saved art.png", img.size)
+    # ---- standfirst ----
+    f_stand = font(SERIF_I, 17)
+    centre(d, 138, "The world in full, before your first coffee \u2014 every story that mattered overnight.",
+           f_stand, fill=GREY)
+    rule(d, MX, RX, 166, 1)
+
+    # ---- LEAD ----
+    f_kick = font(SERIF_B, 14)
+    d.text((MX, 178), "WORLD COURT RULING", font=f_kick, fill=INK)
+    lead_x, lead_w = MX, 560
+    f_head = font(SERIF_B, 40)
+    y = 202
+    y = para(d, lead_x, y, "WORLD COURT: MYANMAR GUILTY OF GENOCIDE",
+             f_head, lead_w, 46)
+    y += 6
+    f_body = font(SERIF, 19)
+    para(d, lead_x, y,
+         "The International Court of Justice ruled Myanmar committed genocide "
+         "against the Rohingya; fourteen nations (UK, Spain, Canada, Australia "
+         "and ten more) affirmed the ruling on Monday.",
+         f_body, lead_w, 24)
+
+    # scales panel, right of the lead
+    px0, py0, px1, py1 = 636, 178, RX, 436
+    d.rectangle([px0, py0, px1, py1], outline=INK, width=2)
+    draw_scales(d, (px0 + px1) // 2, py0 + 26, py1 - 44)
+    f_cap = font(SERIF_B, 14)
+    cap_txt = "JUSTICE, WEIGHED"
+    cap_w = d.textlength(cap_txt, font=f_cap)
+    d.text((((px0 + px1) - cap_w) / 2, py1 - 30), cap_txt, font=f_cap, fill=INK)
+
+    # ---- three-column row ----
+    rule(d, MX, RX, 452, 2)
+    cols3 = [
+        ("SHENZHOU 24 CARRIES PAKISTANI ASTRONAUT TO TIANGONG",
+         "China launches two Chinese and one Pakistani astronaut (Zeeshan Ali, "
+         "the first foreign astronaut aboard its space station)."),
+        ("UN CHIEF: ACT ON AI RISKS WITHIN A YEAR",
+         "Secretary-General Antonio Guterres calls on states to build a "
+         "multilateral framework to limit AI risks."),
+        ("NEPAL SHAKEN BY 5.6 QUAKE",
+         "A magnitude 5.6 earthquake strikes Nepal near the Chinese border."),
+    ]
+    col_w = 296
+    xs = [MX, MX + 328, MX + 656]
+    f_h3 = font(SERIF_B, 18)
+    f_b3 = font(SERIF, 14)
+    for x, (head, body) in zip(xs, cols3):
+        yy = para(d, x, 466, head, f_h3, col_w, 22)
+        para(d, x, yy + 4, body, f_b3, col_w, 18)
+    # vertical separators
+    for vx in (MX + 312, MX + 640):
+        d.line([(vx, 466), (vx, 596)], fill=GREY, width=1)
+
+    # ---- two-column row ----
+    rule(d, MX, RX, 612, 2)
+    cols2 = [
+        ("HUAWEI GUILTY ON TRADE SECRETS AND BANK FRAUD",
+         "A US jury convicts Huawei of conspiracy to steal trade secrets and "
+         "bank fraud, acquits it of racketeering."),
+        ("IRGC SAYS IT HIT SHIP IN HORMUZ",
+         "Iran's Revolutionary Guard says its navy attacked a container ship; "
+         "Tehran reports tankers struck mines in the strait."),
+    ]
+    f_h2 = font(SERIF_B, 20)
+    f_b2 = font(SERIF, 15)
+    xs2 = [MX, MX + 492]
+    for x, (head, body) in zip(xs2, cols2):
+        yy = para(d, x, 626, head, f_h2, 460, 25)
+        para(d, x, yy + 4, body, f_b2, 460, 19)
+    d.line([(W // 2, 626), (W // 2, 726)], fill=GREY, width=1)
+
+    # ---- THE DAY IN BRIEF ----
+    rule(d, MX, RX, 742, 2)
+    f_sec = font(SERIF_B, 16)
+    d.text((MX, 754), "THE DAY IN BRIEF", font=f_sec, fill=INK)
+    brief = [
+        "Ukrainian drones hit a Russian ship in the Gulf of Finland and off Libya.",
+        "25 hostages held at a supermarket in Cartagena, Colombia.",
+        "Turkish Air Force helicopter crashes in Eskisehir; 5 crew killed.",
+        "Houthis 60 km from Aden, ready to strike, officials warn.",
+        "Senegal win the Africa Cup of Nations on appeal.",
+        "Markets surge \u2014 Seoul +6%, Nikkei +3.91% \u2014 as Nvidia restores Jensen Huang as CEO.",
+        "North Korea asks Switzerland to close its Pyongyang diplomatic office.",
+        "Hanoi hot-pot restaurant blast kills 6.",
+        "Bangladesh's Hasina plans to return home on 16 December.",
+        "Britain sanctions the Houthis and four officials.",
+        "Israeli strike kills Hamas internal security chief in Gaza.",
+        "Haftar makes his first visit to Turkey.",
+        "US ready to impose tariffs on China and the EU.",
+        "Quasar found 630 million years after the Big Bang.",
+        "S&P 500 +4.73%, Nasdaq +6.51%.",
+        "Trump calls toppling Iran's regime \u2018probably doable\u2019.",
+        "Zelenskyy criticises US over delayed missiles.",
+    ]
+    f_br = font(SERIF, 12)
+    groups = [brief[0:6], brief[6:12], brief[12:]]
+    for x, items in zip(xs, groups):
+        yy = 782
+        for item in items:
+            yy = para(d, x, yy, "\u2022  " + item, f_br, col_w, 15)
+            yy += 4
+    for vx in (MX + 312, MX + 640):
+        d.line([(vx, 782), (vx, 972)], fill=GREY, width=1)
+
+    # ---- footer ----
+    rule(d, MX, RX, 982, 1)
+    f_ft = font(SERIF_I, 12)
+    centre(d, 990,
+           "Every story in this edition was first reported on Tuesday, 24 November 2026. "
+           "Sources: Reuters, AP, AFP, BBC.", f_ft, fill=GREY)
+    f_ft2 = font(SERIF_B, 11)
+    centre(d, 1006, "THE MORNING GLOBE \u00b7 TUESDAY, 24 NOVEMBER 2026", f_ft2, fill=GREY)
+
+    img.save("art.png", optimize=True)
+    print("wrote art.png", img.size)
+
+
+if __name__ == "__main__":
+    main()

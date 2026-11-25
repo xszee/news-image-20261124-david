@@ -1,26 +1,28 @@
-# news-image-20261124-david
+# THE MORNING GLOBE
 
-One image summing up the world's news of Tuesday 24 November 2026, drawn as a newspaper front page: "THE WORLD IN ONE DAY".
+![bounty](https://make.fun/badge/news-image-20261124.svg)
+![rank](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/rank.svg)
+![reward](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/reward.svg)
 
-[![news-image-20261124](https://make.fun/badge/news-image-20261124.svg)](https://make.fun/bounty/news-image-20261124)
-[![rank](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/rank.svg)](https://make.fun/bounty/news-image-20261124)
-[![reward](https://make.fun/badge/news-image-20261124/xszee/news-image-20261124-david/reward.svg)](https://make.fun/bounty/news-image-20261124)
+A single-page morning paper covering Tuesday, 24 November 2026 — every
+story on the page was first reported that day. The front page leads with
+the World Court's genocide ruling against Myanmar, then turns to a
+Pakistani astronaut riding Shenzhou 24 to Tiangong, the UN chief's call
+for action on AI risks within a year, a 5.6 quake in Nepal, a US jury's
+verdict against Huawei, and the Revolutionary Guard's account of a ship
+attack in the Strait of Hormuz. Seventeen more stories run in brief
+below the fold, from markets rallying in Seoul and Tokyo to a quasar
+spotted 630 million years after the Big Bang.
 
-## What it shows
+The artwork (`art.png`, 1024x1024) is drawn from scratch with Pillow by
+`draw.py` — masthead, date line, lead column beside a hand-drawn scales
+of justice, three- and two-column story rows, and a briefs section.
+`main.ts` checks the PNG (magic bytes, 1024x1024, under 1 MiB) and copies
+it to `$MAKEFUN_OUTPUT_DIR/entry.png`.
 
-The lead story is Nvidia bringing back Jensen Huang as CEO, after President Trump said he personally persuaded the board — with markets surging (Seoul +6%, Nikkei +3.91%). Below it: the US jury verdict finding Huawei guilty of trade-secret theft and bank fraud, the IRGC's reported attack on a container ship in the Strait of Hormuz, the fourteen-country backing of the ICJ genocide ruling on Myanmar, Ukraine's drone strikes on Russian ships, and the Shenzhou 24 launch carrying Pakistan's Zeeshan Ali — plus a "Day on the Map" strip and an eighteen-item "Day in Brief" covering the Nepal earthquake, the Turkish helicopter crash, the Houthi advance on Aden, Senegal's Africa Cup of Nations title, the Hanoi blast, and more. Every fact is from news reported on 24 November 2026.
-
-## How it is built
-
-- `draw.py` draws the 1024x1024 front page with PIL (Liberation fonts) and writes `art.png`.
-- `main.ts` (Node 22, standard library only) validates `art.png` — PNG magic, IHDR and IEND chunks, 1024x1024 dimensions, under 1 MiB — and copies it to `$MAKEFUN_OUTPUT_DIR/entry.png`.
-
-## Check locally
+## Run it
 
 ```sh
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+python3 draw.py          # regenerates art.png
+MAKEFUN_OUTPUT_DIR=out node main.ts   # writes out/entry.png
 ```
-
-## License
-
-MIT — see [LICENSE](LICENSE).
